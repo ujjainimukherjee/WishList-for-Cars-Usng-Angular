@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='myApp'>
+	<head>
+		<title>WishList with angular</title>
+		<link href='style.css' type='text/css' rel='stylesheet' />
+	</head>
+
+	<body ng-controller='myController as ctrl'>
+		<div id="carList">
+			<p>
+				Choose a Car
+			</p>
+			<select id='carList-ddl' ng-change='ctrl.selectCar()' data-ng-model="ctrl.selectDefault" data-ng-options="p as p.model group by p.make for p in ctrl.cars | orderBy:['make','model']"></select>
+			<span class="no-cars-alert-text">You have selected all cars in the List
+				<br/>
+				Please delete a car from wish list for further selection
+			</span>
+			<button id='add-car-btn' ng-click="ctrl.addCar()">
+				Add Car
+			</button>
+		</div>
+		<aside id="wishList">
+			<p>
+				WishList
+			</p>
+			<p class="defaultWishListText">
+				Please click on 'Add It' to Add to Wish List
+			</p>
+
+			<ul title="My Dream Cars" id="wishlist">
+				<li ng-repeat="c in ctrl.newcars" ng-cloak>
+					<span class='wishlist-car-model' ng-bind='c.model'></span>
+					<span class='wishlist-car-make' ng-bind='c.make'></span>
+					<a  ng-click="ctrl.deleteItem($index)" class="delbutton" ng-cloak></a>
+				</li>
+			</ul>
+		</aside>
+
+		<script src="angular.js"></script>
+		<script src="jquery.js"></script>
+		<script src='cars.js'></script>
+
+		<script>
+			angular.module('myApp', []).controller('myController', [
+			function() {
+				this.cars = dreamCars;
+				this.selectDefault = this.cars[0];
+				this.newcars = [];
+				this.selectCar = function(o) {
+					var selectedCar = this.selectDefault;
+
+				}
+				this.addCar = function() {
+					var newcar = this.selectDefault;
+					// add the selected car to the wishlist array
+					this.newcars.push(newcar);
+					// remove the car from cars array and rebind data to drop down list
+					var index = this.cars.indexOf(newcar)
+					this.cars.splice(index, 1);
+					if (this.cars.length == 0) {
+						$('.no-cars-alert-text').show();
+						$('.carList, #carList-ddl, #add-car-btn').hide();
+						return;
+					}
+					this.selectDefault = this.cars[0];
+				}
+				// delete car from wish list
+				// and add it back to original drop down
+				this.deleteItem = function(i) {
+					var deletedCarMake = $('ul li:eq(' + i + ')').find('.wishlist-car-make').text();
+					var deletedCarModel = $('ul li:eq(' + i + ')').find('.wishlist-car-model').text();
+					var car = {
+						make : deletedCarMake,
+						model : deletedCarModel
+					};
+					this.cars.push(car);
+					if (this.cars.length == 1){
+					   $('.no-cars-alert-text').hide();
+						$('.carList, #carList-ddl, #add-car-btn').show();	
+					}
+					this.selectDefault = this.cars[0];
+					var index = this.newcars.indexOf(car);
+					this.newcars.splice(i, 1);
+				}
+			}])
+		</script>
+
+	</body>
+</html>
